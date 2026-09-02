@@ -1,0 +1,885 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Playwright Automation Tutorial</title>
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --muted: #5b6470;
+    --accent: #2b6cb0;
+    --accent-soft: #ebf3fb;
+    --line: #d7dce2;
+    --code-bg: #f6f8fa;
+    --code-ink: #24292f;
+    --warn-bg: #fff8e1;
+    --warn-line: #e6c200;
+    --ok-bg: #e9f7ef;
+    --ok-line: #33a06f;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { font-size: 10.5pt; }
+
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  h1, h2, h3, h4 { line-height: 1.25; font-weight: 700; }
+  h1 { font-size: 25pt; margin: 0 0 6pt; }
+  h2 {
+    font-size: 17pt;
+    margin: 0 0 10pt;
+    padding-bottom: 5pt;
+    border-bottom: 2px solid var(--accent);
+    color: var(--accent);
+  }
+  h3 { font-size: 13pt; margin: 18pt 0 6pt; }
+  h4 { font-size: 11pt; margin: 14pt 0 4pt; color: var(--muted); }
+
+  p { margin: 0 0 8pt; }
+  ul, ol { margin: 0 0 8pt; padding-left: 20pt; }
+  li { margin: 0 0 3pt; }
+
+  a { color: var(--accent); text-decoration: none; }
+
+  code {
+    font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    font-size: 8.9pt;
+    background: var(--code-bg);
+    color: var(--code-ink);
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
+
+  pre {
+    background: var(--code-bg);
+    color: var(--code-ink);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10pt 12pt;
+    overflow-x: auto;
+    font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    font-size: 8.6pt;
+    line-height: 1.5;
+    margin: 0 0 10pt;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  pre code { background: none; padding: 0; font-size: inherit; }
+
+  .cmt { color: #6a737d; }
+  .kw  { color: #cf222e; }
+  .str { color: #0a3069; }
+  .fn  { color: #8250df; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 0 12pt;
+    font-size: 9pt;
+  }
+  th, td {
+    border: 1px solid var(--line);
+    padding: 5pt 7pt;
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: var(--accent-soft); font-weight: 700; }
+
+  .callout {
+    border-left: 4px solid var(--accent);
+    background: var(--accent-soft);
+    padding: 8pt 12pt;
+    margin: 0 0 12pt;
+    border-radius: 0 4px 4px 0;
+  }
+  .callout.warn { border-left-color: var(--warn-line); background: var(--warn-bg); }
+  .callout.ok   { border-left-color: var(--ok-line);   background: var(--ok-bg); }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout .tag { font-weight: 700; text-transform: uppercase; font-size: 8pt; letter-spacing: 0.5px; }
+
+  .lead { font-size: 11.5pt; color: var(--muted); }
+
+  hr { border: none; border-top: 1px solid var(--line); margin: 16pt 0; }
+
+  /* ---- print / pdf ---- */
+  @page { size: A4; margin: 18mm 16mm; }
+
+  .cover {
+    height: 245mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .cover .kicker { color: var(--accent); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-size: 10pt; margin-bottom: 10pt; }
+  .cover .sub { font-size: 13pt; color: var(--muted); margin-top: 4pt; }
+  .cover .meta { margin-top: 30pt; font-size: 9.5pt; color: var(--muted); }
+  .cover .meta strong { color: var(--ink); }
+
+  section { page-break-before: always; }
+  section.no-break { page-break-before: auto; }
+
+  pre, table, .callout, figure { page-break-inside: avoid; }
+  h2, h3, h4 { page-break-after: avoid; }
+
+  .toc ol { list-style: none; padding-left: 0; counter-reset: toc; }
+  .toc > ol > li { counter-increment: toc; margin-bottom: 5pt; font-weight: 600; }
+  .toc > ol > li::before { content: counter(toc) ".  "; color: var(--accent); font-weight: 700; }
+  .toc ul { list-style: none; padding-left: 18pt; margin: 3pt 0 0; font-weight: 400; }
+  .toc ul li::before { content: "– "; color: var(--muted); }
+
+  .filetree {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 8.6pt;
+    background: var(--code-bg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10pt 12pt;
+    line-height: 1.6;
+  }
+  .filetree .c { color: var(--muted); }
+
+  .pill {
+    display: inline-block;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border: 1px solid #bcd8f0;
+    border-radius: 10px;
+    padding: 0 7px;
+    font-size: 8pt;
+    font-weight: 700;
+    font-family: monospace;
+  }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="kicker">Hands-on Tutorial</div>
+  <h1>From Selenium to Playwright</h1>
+  <div class="sub">Understanding the <code>playwrightautomation</code> project &amp; learning Playwright with JavaScript</div>
+  <div class="meta">
+    <p><strong>Project:</strong> playwrightautomation — a 1:1 Playwright port of the actiTIME Selenium + TestNG framework</p>
+    <p><strong>Application under test:</strong> actiTIME online demo (https://online.actitime.com)</p>
+    <p><strong>Stack:</strong> Node.js · @playwright/test · Page Object Model · Excel-driven data</p>
+    <p><strong>Audience:</strong> testers who know Selenium/TestNG and want to learn Playwright</p>
+  </div>
+</div>
+
+<section class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li>What this project is
+      <ul><li>The original Selenium project</li><li>What changed in the port</li></ul>
+    </li>
+    <li>Playwright vs Selenium — the mental model shift
+      <ul><li>Auto-waiting</li><li>Locators</li><li>Web-first assertions</li><li>Built-in test runner</li></ul>
+    </li>
+    <li>Setup &amp; installation</li>
+    <li>Project structure</li>
+    <li>File-by-file walkthrough
+      <ul>
+        <li>playwright.config.js</li>
+        <li>src/testbase/excelLibrary.js &amp; excelSync.js</li>
+        <li>src/pageclasses/tasksPage.js — Page Object Model</li>
+        <li>src/fixtures/baseTest.js — fixtures &amp; lifecycle</li>
+        <li>The spec files</li>
+      </ul>
+    </li>
+    <li>How the actiTIME flows work, step by step</li>
+    <li>Data-driven testing with Excel</li>
+    <li>Running &amp; debugging tests</li>
+    <li>Selenium → Playwright cheat sheet</li>
+    <li>Exercises</li>
+    <li>Troubleshooting &amp; FAQ</li>
+    <li>Where to go next</li>
+  </ol>
+</section>
+
+<!-- 1 -->
+<section>
+  <h2>1 · What this project is</h2>
+
+  <p class="lead">This repository is a faithful re-implementation of an existing Selenium automation
+  project, rebuilt with Playwright and JavaScript. The test <em>behaviour</em>, the locators, the
+  test data and the flow are identical — only the automation framework changed.</p>
+
+  <h3>1.1 · The original Selenium project</h3>
+  <p>The source project (<code>Downloads/Project/Actitime</code>) is a classic Java test-automation
+  framework built for practising UI automation against the actiTIME demo application. It uses:</p>
+  <ul>
+    <li><strong>Selenium WebDriver</strong> — browser automation</li>
+    <li><strong>TestNG</strong> — test runner, annotations (<code>@BeforeClass</code>,
+      <code>@BeforeMethod</code>…), and XML suite files</li>
+    <li><strong>Apache POI</strong> — reading test data from an Excel workbook</li>
+    <li><strong>Page Object Model</strong> — UI locators isolated in "page classes"</li>
+  </ul>
+
+  <p>Its Java packages:</p>
+  <table>
+    <tr><th>Class</th><th>Responsibility</th></tr>
+    <tr><td><code>testbase.BaseClass</code></td><td>Opens the browser (browser name read from Excel), navigates to the login page, logs in before every test, "logs out" after every test, closes the browser at the end.</td></tr>
+    <tr><td><code>testbase.ExcelLibrary</code></td><td>Helper methods <code>getExcelData(sheet, row, cell)</code> and <code>getLastRowNum(sheet)</code>.</td></tr>
+    <tr><td><code>pageclasses.TasksPage</code></td><td>Page object: <code>clickOnTasks()</code>, <code>clickOnAddNew()</code>.</td></tr>
+    <tr><td><code>tasks.CreateCustomer</code></td><td>Test: create a customer from Excel data.</td></tr>
+    <tr><td><code>tasks.DeleteCustomer</code></td><td>Test: search a customer and delete it permanently.</td></tr>
+    <tr><td><code>users.CreateUser</code> / <code>users.DeleteUser</code></td><td>Placeholder tests (they only print a line) — useful for demonstrating suite composition.</td></tr>
+  </table>
+
+  <p>Four TestNG XML suites decide <em>which</em> tests run together: <code>smoke.xml</code>,
+  <code>customer.xml</code>, <code>user.xml</code>, <code>functionlaity.xml</code> (spelling from the
+  original).</p>
+
+  <h3>1.2 · What changed in the port</h3>
+  <table>
+    <tr><th>Concept</th><th>Selenium + TestNG</th><th>Playwright</th></tr>
+    <tr><td>Language</td><td>Java</td><td>JavaScript (Node.js)</td></tr>
+    <tr><td>Browser driver</td><td>WebDriver + driver binaries</td><td>Bundled browsers, no drivers</td></tr>
+    <tr><td>Runner</td><td>TestNG</td><td><code>@playwright/test</code></td></tr>
+    <tr><td>Base class</td><td><code>BaseClass</code> inheritance</td><td>A <em>fixture</em> file you import</td></tr>
+    <tr><td>Suite selection</td><td>XML files</td><td>Test <strong>tags</strong> + <code>--grep</code></td></tr>
+    <tr><td>Excel</td><td>Apache POI</td><td><code>exceljs</code> (+ a tiny sync reader for config)</td></tr>
+    <tr><td>Waiting</td><td>Implicit/explicit waits you write</td><td>Automatic — built into every action</td></tr>
+  </table>
+
+  <div class="callout ok">
+    <p><span class="tag">Key idea</span> Nothing about the <em>test intent</em> changed. If you understand
+    the Selenium project, this document shows you the Playwright equivalent of each piece — that is the
+    fastest way to learn Playwright.</p>
+  </div>
+</section>
+
+<!-- 2 -->
+<section>
+  <h2>2 · Playwright vs Selenium — the mental model shift</h2>
+
+  <p>Four differences explain almost everything you will see in the code.</p>
+
+  <h3>2.1 · Auto-waiting (the big one)</h3>
+  <p>In Selenium you constantly fight timing: <code>WebDriverWait</code>, <code>ExpectedConditions</code>,
+  <code>Thread.sleep</code>, <code>implicitlyWait</code>. In Playwright, <strong>every action waits
+  automatically</strong> until the element is actionable — attached to the DOM, visible, stable (not
+  animating), enabled, and not obscured by another element. Only then does it click/fill/etc.</p>
+  <pre><code><span class="cmt">// Selenium — you manage the wait</span>
+<span class="kw">new</span> WebDriverWait(driver, Duration.ofSeconds(<span class="str">10</span>))
+    .until(ExpectedConditions.elementToBeClickable(By.id(<span class="str">"loginButton"</span>)))
+    .click();
+
+<span class="cmt">// Playwright — the wait is inside .click()</span>
+<span class="kw">await</span> page.locator(<span class="str">'#loginButton'</span>).click();</code></pre>
+  <p>That is why this project has almost no explicit waits, even though the Selenium original relied on a
+  30-second implicit wait.</p>
+
+  <h3>2.2 · Locators are lazy and re-queried</h3>
+  <p>A Selenium <code>WebElement</code> is a snapshot — grab it, and if the page re-renders you get a
+  <code>StaleElementReferenceException</code>. A Playwright <code>Locator</code> is a <em>description</em>
+  of how to find an element. It is resolved fresh every time you use it, so "stale element" simply does
+  not exist.</p>
+  <pre><code><span class="kw">const</span> tasksLink = page.locator(<span class="str">"a[href='/hni/tasks/tasklist.do']"</span>);
+<span class="kw">await</span> tasksLink.click();   <span class="cmt">// re-finds the element right now</span>
+<span class="kw">await</span> tasksLink.click();   <span class="cmt">// re-finds it again — never stale</span></code></pre>
+
+  <h3>2.3 · Web-first assertions</h3>
+  <p>Playwright's <code>expect()</code> for page/locator conditions <strong>retries</strong> until the
+  condition is true or a timeout is hit. No manual polling.</p>
+  <pre><code><span class="cmt">// Retries for up to `expect.timeout` ms until the heading has this text</span>
+<span class="kw">await</span> expect(page.locator(<span class="str">"h3"</span>)).toHaveText(<span class="str">"Enter Time-Track for"</span>);</code></pre>
+  <p>Compare with TestNG's <code>Assert.assertEquals(...)</code>, which checks exactly once.</p>
+
+  <h3>2.4 · The test runner is included</h3>
+  <p>Playwright ships its own runner: parallelism, retries, reporters, trace capture, fixtures, projects,
+  and config — all in <code>@playwright/test</code>. There is no separate TestNG/JUnit layer.</p>
+
+  <table>
+    <tr><th>TestNG</th><th>Playwright Test</th></tr>
+    <tr><td><code>@Test</code></td><td><code>test('name', async () =&gt; { … })</code></td></tr>
+    <tr><td><code>@BeforeMethod</code></td><td><code>test.beforeEach(async () =&gt; { … })</code></td></tr>
+    <tr><td><code>@AfterMethod</code></td><td><code>test.afterEach(...)</code></td></tr>
+    <tr><td><code>@BeforeClass</code> / <code>@AfterClass</code></td><td><code>test.beforeAll</code> / <code>test.afterAll</code> (per file)</td></tr>
+    <tr><td><code>@DataProvider</code></td><td>a loop around <code>test(...)</code>, or a parametrised fixture</td></tr>
+    <tr><td>suite <code>.xml</code></td><td>tags + <code>--grep</code>, or config <code>projects</code></td></tr>
+    <tr><td><code>Assert.*</code></td><td><code>expect(...)</code></td></tr>
+  </table>
+</section>
+
+<!-- 3 -->
+<section>
+  <h2>3 · Setup &amp; installation</h2>
+
+  <h3>3.1 · Prerequisites</h3>
+  <ul>
+    <li><strong>Node.js 18+</strong> (this project was built on Node 25). Check: <code>node -v</code></li>
+    <li><strong>npm</strong> (bundled with Node). Check: <code>npm -v</code></li>
+  </ul>
+
+  <h3>3.2 · Install</h3>
+  <pre><code><span class="cmt"># from the project root</span>
+npm install               <span class="cmt"># installs @playwright/test, exceljs, adm-zip</span>
+npx playwright install    <span class="cmt"># downloads the browser binaries (Chromium, Firefox, WebKit)</span></code></pre>
+
+  <div class="callout">
+    <p><span class="tag">Why two steps</span> <code>npm install</code> gets the npm packages.
+    <code>npx playwright install</code> downloads the actual browsers Playwright drives. They are cached
+    globally (<code>~/Library/Caches/ms-playwright</code>), not inside <code>node_modules</code>.</p>
+  </div>
+
+  <h3>3.3 · First run</h3>
+  <pre><code>npm run test:user     <span class="cmt"># quickest: logs in, prints two lines, logs out</span></code></pre>
+  <p>Expected output:</p>
+  <pre><code>Running 2 tests using 1 worker
+
+Create User
+  ✓  1 [firefox] › tests/users/createUser.spec.js:4:1 › testCreateUser
+Delete Uer
+  ✓  2 [firefox] › tests/users/deleteUser.spec.js:4:1 › testDeleteUser
+
+  2 passed</code></pre>
+</section>
+
+<!-- 4 -->
+<section>
+  <h2>4 · Project structure</h2>
+
+  <div class="filetree">
+playwrightautomation/<br>
+├── package.json                  <span class="c"># scripts + dependencies</span><br>
+├── playwright.config.js          <span class="c"># runner config; picks the browser from Excel</span><br>
+├── data/<br>
+│   └── data.xlsx                 <span class="c"># test data (verbatim copy of the Selenium project's)</span><br>
+├── src/<br>
+│   ├── testbase/<br>
+│   │   ├── excelLibrary.js       <span class="c"># async Excel reader used by tests (ExcelLibrary.java)</span><br>
+│   │   └── excelSync.js          <span class="c"># tiny sync Excel reader used only by the config</span><br>
+│   ├── pageclasses/<br>
+│   │   └── tasksPage.js          <span class="c"># Page Object (TasksPage.java)</span><br>
+│   └── fixtures/<br>
+│       └── baseTest.js           <span class="c"># custom `test` with login/logout (BaseClass.java)</span><br>
+├── tests/<br>
+│   ├── tasks/<br>
+│   │   ├── createCustomer.spec.js<br>
+│   │   └── deleteCustomer.spec.js<br>
+│   └── users/<br>
+│       ├── createUser.spec.js<br>
+│       └── deleteUser.spec.js<br>
+├── testng-suites-reference/      <span class="c"># the original .xml suites, kept for traceability</span><br>
+└── docs/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;└── tutorial.html / tutorial.pdf
+  </div>
+
+  <h3>Mapping to the Selenium project</h3>
+  <table>
+    <tr><th>Selenium (Java)</th><th>Playwright (JavaScript)</th></tr>
+    <tr><td><code>com.krn.actitime.testbase.BaseClass</code></td><td><code>src/fixtures/baseTest.js</code></td></tr>
+    <tr><td><code>com.krn.actitime.testbase.ExcelLibrary</code></td><td><code>src/testbase/excelLibrary.js</code></td></tr>
+    <tr><td><code>com.krn.actitime.pageclasses.TasksPage</code></td><td><code>src/pageclasses/tasksPage.js</code></td></tr>
+    <tr><td><code>com.krn.actitime.tasks.CreateCustomer</code></td><td><code>tests/tasks/createCustomer.spec.js</code></td></tr>
+    <tr><td><code>com.krn.actitime.tasks.DeleteCustomer</code></td><td><code>tests/tasks/deleteCustomer.spec.js</code></td></tr>
+    <tr><td><code>com.krn.actitime.users.CreateUser / DeleteUser</code></td><td><code>tests/users/createUser.spec.js</code> / <code>deleteUser.spec.js</code></td></tr>
+    <tr><td><code>Data/data.xlsx</code></td><td><code>data/data.xlsx</code></td></tr>
+    <tr><td><code>smoke.xml / customer.xml / user.xml / functionlaity.xml</code></td><td>tags <span class="pill">@smoke</span> <span class="pill">@customer</span> <span class="pill">@user</span> <span class="pill">@functionality</span> + npm scripts</td></tr>
+  </table>
+</section>
+
+<!-- 5 -->
+<section>
+  <h2>5 · File-by-file walkthrough</h2>
+
+  <h3>5.1 · package.json</h3>
+  <pre><code>{
+  <span class="str">"scripts"</span>: {
+    <span class="str">"test"</span>:                <span class="str">"playwright test"</span>,
+    <span class="str">"test:headed"</span>:         <span class="str">"playwright test --headed"</span>,
+    <span class="str">"test:smoke"</span>:          <span class="str">"playwright test --grep @smoke"</span>,
+    <span class="str">"test:customer"</span>:       <span class="str">"playwright test --grep @customer"</span>,
+    <span class="str">"test:user"</span>:           <span class="str">"playwright test --grep @user"</span>,
+    <span class="str">"test:functionality"</span>:  <span class="str">"playwright test --grep @functionality"</span>,
+    <span class="str">"report"</span>:              <span class="str">"playwright show-report test-output"</span>
+  },
+  <span class="str">"devDependencies"</span>: { <span class="str">"@playwright/test"</span>: <span class="str">"^1.55.0"</span>, <span class="str">"exceljs"</span>: <span class="str">"^4.4.0"</span> },
+  <span class="str">"dependencies"</span>:    { <span class="str">"adm-zip"</span>: <span class="str">"^0.5.18"</span> }
+}</code></pre>
+  <p>Each <code>test:*</code> script is the equivalent of running one TestNG XML file. They all call the
+  same <code>playwright test</code> binary with a different <code>--grep</code> tag filter.</p>
+
+  <h3>5.2 · playwright.config.js</h3>
+  <p>This is the runner's control panel. The interesting part is that it reproduces the Selenium
+  <code>BaseClass</code> behaviour of choosing the browser from the <code>Browser</code> sheet of
+  <code>data.xlsx</code>.</p>
+  <pre><code><span class="kw">const</span> { defineConfig } = <span class="fn">require</span>(<span class="str">'@playwright/test'</span>);
+<span class="kw">const</span> { getExcelDataSync } = <span class="fn">require</span>(<span class="str">'./src/testbase/excelSync'</span>);
+
+<span class="cmt">// driver.manage().window().maximize()  ->  a large desktop viewport</span>
+<span class="kw">const</span> MAXIMIZED = { width: <span class="str">1920</span>, height: <span class="str">1080</span> };
+<span class="kw">const</span> BROWSER_PROJECTS = {
+  firefox:  { name: <span class="str">'firefox'</span>,  use: { browserName: <span class="str">'firefox'</span>,  viewport: MAXIMIZED } },
+  chromium: { name: <span class="str">'chromium'</span>, use: { browserName: <span class="str">'chromium'</span>, viewport: MAXIMIZED } },
+  chrome:   { name: <span class="str">'chrome'</span>,   use: { browserName: <span class="str">'chromium'</span>, channel: <span class="str">'chrome'</span>, viewport: MAXIMIZED } },
+  <span class="cmt">// ie / edge  ->  msedge channel  (Playwright has no Internet Explorer)</span>
+  ie:       { name: <span class="str">'msedge'</span>,   use: { browserName: <span class="str">'chromium'</span>, channel: <span class="str">'msedge'</span>, viewport: MAXIMIZED } },
+  webkit:   { name: <span class="str">'webkit'</span>,   use: { browserName: <span class="str">'webkit'</span>,   viewport: MAXIMIZED } },
+};
+
+<span class="kw">let</span> browserName = process.env.BROWSER || getExcelDataSync(<span class="str">'Browser'</span>, <span class="str">1</span>, <span class="str">0</span>); <span class="cmt">// -> "firefox"</span>
+<span class="kw">const</span> project = BROWSER_PROJECTS[(browserName || <span class="str">'chromium'</span>).toLowerCase()] || BROWSER_PROJECTS.chromium;
+
+module.exports = <span class="fn">defineConfig</span>({
+  testDir: <span class="str">'./tests'</span>,
+  fullyParallel: <span class="kw">false</span>,          <span class="cmt">// the Selenium project ran serially</span>
+  workers: <span class="str">1</span>,
+  timeout: <span class="str">60_000</span>,               <span class="cmt">// per-test timeout</span>
+  expect: { timeout: <span class="str">30_000</span> },     <span class="cmt">// mirrors the 30s implicit wait</span>
+  reporter: [[<span class="str">'list'</span>], [<span class="str">'html'</span>, { outputFolder: <span class="str">'test-output'</span>, open: <span class="str">'never'</span> }]],
+  use: {
+    baseURL: <span class="str">'https://online.actitime.com'</span>,
+    actionTimeout: <span class="str">30_000</span>,
+    navigationTimeout: <span class="str">30_000</span>,
+    screenshot: <span class="str">'only-on-failure'</span>,
+    trace: <span class="str">'on-first-retry'</span>,
+  },
+  projects: [project],
+});</code></pre>
+
+  <table>
+    <tr><th>Option</th><th>What it does</th><th>Selenium equivalent</th></tr>
+    <tr><td><code>testDir</code></td><td>Where the runner looks for <code>*.spec.js</code></td><td>—</td></tr>
+    <tr><td><code>use.baseURL</code></td><td>Prefix for <code>page.goto('/hni/login.do')</code></td><td><code>driver.get(fullUrl)</code></td></tr>
+    <tr><td><code>use.viewport</code></td><td>Window size for the browser context</td><td><code>window().maximize()</code></td></tr>
+    <tr><td><code>expect.timeout</code></td><td>How long web-first assertions retry</td><td><code>implicitlyWait(30s)</code></td></tr>
+    <tr><td><code>actionTimeout</code></td><td>How long a click/fill waits for actionability</td><td><code>implicitlyWait(30s)</code></td></tr>
+    <tr><td><code>trace</code></td><td>Records a step-by-step debug trace</td><td>no equivalent — this is a Playwright superpower</td></tr>
+    <tr><td><code>projects</code></td><td>Named browser configurations to run</td><td>roughly: the browser <code>if/else</code> in <code>BaseClass</code></td></tr>
+  </table>
+
+  <div class="callout warn">
+    <p><span class="tag">Why two Excel readers?</span> <code>playwright.config.js</code> is loaded
+    <em>synchronously</em> by the runner and must export a plain object. <code>exceljs</code> is
+    async-only, so it cannot run here. <code>excelSync.js</code> is a ~50-line synchronous reader
+    (an <code>.xlsx</code> is a zip; it unzips with <code>adm-zip</code> and parses the XML for one
+    cell) used <strong>only</strong> to pick the browser at load time. Test code uses the richer async
+    <code>excelLibrary.js</code>.</p>
+  </div>
+
+  <h3>5.3 · src/testbase/excelLibrary.js</h3>
+  <p>The port of <code>ExcelLibrary.java</code>. Apache POI uses 0-based row/cell indexes, so this keeps
+  the same 0-based contract the tests were written against.</p>
+  <pre><code><span class="kw">const</span> ExcelJS = <span class="fn">require</span>(<span class="str">'exceljs'</span>);
+<span class="kw">const</span> DATA_FILE = path.join(__dirname, <span class="str">'..'</span>, <span class="str">'..'</span>, <span class="str">'data'</span>, <span class="str">'data.xlsx'</span>);
+
+<span class="kw">class</span> ExcelLibrary {
+  <span class="kw">async</span> <span class="fn">getExcelData</span>(sheetName, rowNum, cellNum) {
+    <span class="kw">const</span> wb = <span class="kw">new</span> ExcelJS.Workbook();
+    <span class="kw">await</span> wb.xlsx.<span class="fn">readFile</span>(DATA_FILE);
+    <span class="kw">const</span> sheet = wb.<span class="fn">getWorksheet</span>(sheetName);
+    <span class="kw">if</span> (!sheet) <span class="kw">return</span> <span class="kw">null</span>;
+    <span class="kw">const</span> cell = sheet.<span class="fn">getRow</span>(rowNum + <span class="str">1</span>).<span class="fn">getCell</span>(cellNum + <span class="str">1</span>);  <span class="cmt">// POI 0-based -> exceljs 1-based</span>
+    <span class="kw">return</span> cell.value == <span class="kw">null</span> ? <span class="kw">null</span> : <span class="fn">String</span>(cell.value);
+  }
+
+  <span class="kw">async</span> <span class="fn">getLastRowNum</span>(sheetName) { <span class="cmt">/* returns sheet.actualRowCount - 1, like POI */</span> }
+}</code></pre>
+  <p>Usage inside a test: <code>const un = await xlib.getExcelData('Login', 1, 0);</code> — sheet
+  <code>Login</code>, row index 1 (the second row), cell index 0 (first column).</p>
+
+  <h3>5.4 · src/pageclasses/tasksPage.js — the Page Object Model</h3>
+  <p>The Page Object Model (POM) keeps locators and page actions in one class so tests read as
+  business steps, not CSS/XPath. This is the port of <code>TasksPage.java</code>. The only structural
+  change: the Selenium version received <code>WebDriver</code> as a method argument; here the Playwright
+  <code>page</code> is passed once to the constructor.</p>
+  <pre><code><span class="kw">class</span> TasksPage {
+  <span class="fn">constructor</span>(page) {
+    <span class="kw">this</span>.page = page;
+  }
+
+  <span class="kw">async</span> <span class="fn">clickOnTasks</span>() {
+    <span class="kw">await</span> <span class="kw">this</span>.page.<span class="fn">locator</span>(<span class="str">"xpath=//a[@href='/hni/tasks/tasklist.do']"</span>).<span class="fn">click</span>();
+  }
+
+  <span class="kw">async</span> <span class="fn">clickOnAddNew</span>() {
+    <span class="kw">await</span> <span class="kw">this</span>.page.<span class="fn">locator</span>(<span class="str">"xpath=//div[@class='addNewButton']"</span>).<span class="fn">click</span>();
+  }
+}</code></pre>
+  <div class="callout">
+    <p><span class="tag">Note</span> <code>page.locator("xpath=…")</code> — the <code>xpath=</code> prefix
+    tells Playwright the string is XPath. The original Selenium XPaths were kept verbatim so the port
+    stays 1:1. In new Playwright code you would usually prefer <code>page.getByRole()</code>,
+    <code>getByText()</code>, <code>getByLabel()</code>, or <code>getByTestId()</code> instead of XPath.</p>
+  </div>
+
+  <h3>5.5 · src/fixtures/baseTest.js — fixtures &amp; the test lifecycle</h3>
+  <p>This file replaces inheritance from <code>BaseClass</code>. Instead of <code>extends BaseClass</code>,
+  each spec does <code>const { test } = require('../../src/fixtures/baseTest')</code> and gets a
+  <code>test</code> function that already knows how to log in and out.</p>
+  <pre><code><span class="kw">const</span> base = <span class="fn">require</span>(<span class="str">'@playwright/test'</span>);
+<span class="kw">const</span> { ExcelLibrary } = <span class="fn">require</span>(<span class="str">'../testbase/excelLibrary'</span>);
+<span class="kw">const</span> { TasksPage }    = <span class="fn">require</span>(<span class="str">'../pageclasses/tasksPage'</span>);
+
+<span class="cmt">// Add two fixtures: `xlib` and `tp`. Tests just list them as parameters.</span>
+<span class="kw">const</span> test = base.test.<span class="fn">extend</span>({
+  xlib: <span class="kw">async</span> ({}, use) =&gt; { <span class="kw">await</span> <span class="fn">use</span>(<span class="kw">new</span> ExcelLibrary()); },
+  tp:   <span class="kw">async</span> ({ page }, use) =&gt; { <span class="kw">await</span> <span class="fn">use</span>(<span class="kw">new</span> TasksPage(page)); },
+});
+
+test.<span class="fn">beforeEach</span>(<span class="kw">async</span> ({ page, xlib }) =&gt; {
+  <span class="cmt">// --- BaseClass.openBrowser() ---</span>
+  <span class="kw">await</span> page.<span class="fn">goto</span>(<span class="str">'/hni/login.do'</span>);
+  <span class="kw">await</span> <span class="fn">expect</span>(page).<span class="fn">toHaveTitle</span>(<span class="str">'actiTIME - Login'</span>);
+
+  <span class="cmt">// --- BaseClass.login() ---</span>
+  <span class="kw">const</span> un = <span class="kw">await</span> xlib.<span class="fn">getExcelData</span>(<span class="str">'Login'</span>, <span class="str">1</span>, <span class="str">0</span>);
+  <span class="kw">const</span> pw = <span class="kw">await</span> xlib.<span class="fn">getExcelData</span>(<span class="str">'Login'</span>, <span class="str">1</span>, <span class="str">1</span>);
+  <span class="kw">await</span> page.<span class="fn">locator</span>(<span class="str">'#username'</span>).<span class="fn">fill</span>(un);
+  <span class="kw">await</span> page.<span class="fn">locator</span>(<span class="str">'input[name="pwd"]'</span>).<span class="fn">fill</span>(pw);
+  <span class="kw">await</span> page.<span class="fn">locator</span>(<span class="str">'#loginButton'</span>).<span class="fn">click</span>();
+  <span class="kw">await</span> <span class="fn">expect</span>(page.<span class="fn">locator</span>(<span class="str">"xpath=//h3[text()='Enter Time-Track for']"</span>))
+        .<span class="fn">toHaveText</span>(<span class="str">'Enter Time-Track for'</span>);
+});
+
+test.<span class="fn">afterEach</span>(<span class="kw">async</span> ({ page }) =&gt; {
+  <span class="cmt">// --- BaseClass.logout() ---</span>
+  <span class="kw">await</span> page.<span class="fn">locator</span>(<span class="str">"xpath=//button[@data-testid='popup_menu_button_profile']"</span>).<span class="fn">click</span>();
+});
+
+module.exports = { test, expect: base.expect };</code></pre>
+
+  <h4>What is a fixture?</h4>
+  <p>A fixture is a named piece of setup that Playwright builds <em>on demand</em> and tears down
+  automatically. If a test's callback lists <code>{ page, tp, xlib }</code>, Playwright:</p>
+  <ol>
+    <li>creates a fresh browser <code>context</code> and <code>page</code> for that test,</li>
+    <li>constructs <code>tp</code> (a <code>TasksPage</code> bound to that page) and <code>xlib</code>,</li>
+    <li>runs <code>beforeEach</code> (login), then the test body, then <code>afterEach</code> (logout),</li>
+    <li>disposes the context — cookies, storage and the page are gone.</li>
+  </ol>
+  <p>The built-in <code>page</code> fixture is what replaces <code>@AfterClass closeBrowser()</code>: you
+  never close anything manually because each test gets an isolated context that Playwright cleans up.</p>
+
+  <div class="callout">
+    <p><span class="tag">Lifecycle mapping</span></p>
+    <table>
+      <tr><th>TestNG</th><th>This project</th></tr>
+      <tr><td><code>@BeforeClass openBrowser()</code></td><td>config <code>projects</code> (browser choice) + <code>goto</code> / title check in <code>beforeEach</code></td></tr>
+      <tr><td><code>@BeforeMethod login()</code></td><td><code>test.beforeEach</code></td></tr>
+      <tr><td><code>@AfterMethod logout()</code></td><td><code>test.afterEach</code></td></tr>
+      <tr><td><code>@AfterClass closeBrowser()</code></td><td>automatic context disposal</td></tr>
+    </table>
+  </div>
+
+  <h3>5.6 · The spec files</h3>
+
+  <h4>tests/tasks/createCustomer.spec.js</h4>
+  <pre><code><span class="kw">const</span> { test } = <span class="fn">require</span>(<span class="str">'../../src/fixtures/baseTest'</span>);
+
+test(<span class="str">'testCreateCustomer'</span>, { tag: [<span class="str">'@customer'</span>, <span class="str">'@functionality'</span>, <span class="str">'@smoke'</span>] },
+  <span class="kw">async</span> ({ page, tp, xlib }) =&gt; {
+    <span class="kw">await</span> tp.<span class="fn">clickOnTasks</span>();
+    <span class="kw">await</span> tp.<span class="fn">clickOnAddNew</span>();
+    <span class="kw">await</span> page.<span class="fn">locator</span>(<span class="str">"xpath=//div[text()='New Customer']"</span>).<span class="fn">click</span>();
+
+    <span class="kw">const</span> custName = <span class="kw">await</span> xlib.<span class="fn">getExcelData</span>(<span class="str">'CreateCustomer'</span>, <span class="str">1</span>, <span class="str">0</span>);  <span class="cmt">// "Prathap"</span>
+    <span class="kw">const</span> desc     = <span class="kw">await</span> xlib.<span class="fn">getExcelData</span>(<span class="str">'CreateCustomer'</span>, <span class="str">1</span>, <span class="str">1</span>);  <span class="cmt">// "This is test"</span>
+
+    <span class="kw">await</span> page.<span class="fn">locator</span>(<span class="str">"xpath=(//input[@placeholder='Enter Customer Name'])[2]"</span>).<span class="fn">fill</span>(custName);
+    <span class="kw">await</span> page.<span class="fn">locator</span>(<span class="str">"xpath=//textarea[@placeholder='Enter Customer Description']"</span>).<span class="fn">fill</span>(desc);
+    <span class="kw">await</span> page.<span class="fn">locator</span>(<span class="str">"xpath=//div[text()='Create Customer']"</span>).<span class="fn">click</span>();
+  });</code></pre>
+  <p>The second argument <code>{ tag: [...] }</code> is how a test joins one or more "suites". These three
+  tags mean this test runs under <code>test:customer</code>, <code>test:functionality</code> and
+  <code>test:smoke</code> — matching <code>customer.xml</code>, <code>functionlaity.xml</code> and
+  <code>smoke.xml</code> in the original.</p>
+
+  <h4>tests/tasks/deleteCustomer.spec.js</h4>
+  <pre><code>test(<span class="str">'testDeleteCustomer'</span>, { tag: [<span class="str">'@customer'</span>, <span class="str">'@functionality'</span>] },
+  <span class="kw">async</span> ({ page, tp, xlib }) =&gt; {
+    <span class="kw">await</span> tp.<span class="fn">clickOnTasks</span>();
+    <span class="kw">const</span> custName = <span class="kw">await</span> xlib.<span class="fn">getExcelData</span>(<span class="str">'DeleteCustomer'</span>, <span class="str">1</span>, <span class="str">0</span>);
+    <span class="kw">await</span> page.<span class="fn">locator</span>(<span class="str">"xpath=(//input[@placeholder='Quick search by name ...'])[1]"</span>).<span class="fn">fill</span>(custName);
+    <span class="kw">await</span> page.<span class="fn">locator</span>(<span class="str">"xpath=//span[text()='"</span> + custName + <span class="str">"']/../../..//div[@class='editButton']"</span>).<span class="fn">click</span>();
+    <span class="kw">await</span> page.<span class="fn">locator</span>(<span class="str">"xpath=(//div[text()='ACTIONS'])[1]"</span>).<span class="fn">click</span>();
+    <span class="kw">await</span> page.<span class="fn">locator</span>(<span class="str">"xpath=(//div[text()='Delete'])[2]"</span>).<span class="fn">click</span>();
+    <span class="kw">await</span> page.<span class="fn">locator</span>(<span class="str">"xpath=//span[text()='Delete permanently']"</span>).<span class="fn">click</span>();
+  });</code></pre>
+
+  <h4>tests/users/createUser.spec.js &amp; deleteUser.spec.js</h4>
+  <pre><code>test(<span class="str">'testCreateUser'</span>, { tag: [<span class="str">'@user'</span>, <span class="str">'@functionality'</span>, <span class="str">'@smoke'</span>] }, <span class="kw">async</span> () =&gt; {
+  console.<span class="fn">log</span>(<span class="str">'Create User'</span>);
+});</code></pre>
+  <p>These do nothing but print — exactly like the Java originals. They still log in and out, because
+  <code>beforeEach</code>/<code>afterEach</code> always run. Their value is to show how tags compose
+  different suites.</p>
+</section>
+
+<!-- 6 -->
+<section>
+  <h2>6 · How the actiTIME flows work, step by step</h2>
+
+  <h3>6.1 · Every test (beforeEach → body → afterEach)</h3>
+  <ol>
+    <li><strong>Navigate</strong> to <code>https://online.actitime.com/hni/login.do</code>.</li>
+    <li><strong>Assert</strong> the page title is <code>actiTIME - Login</code>.</li>
+    <li><strong>Read</strong> username + password from the <code>Login</code> sheet
+      (<code>hemanthni101@gmail.com</code> / <code>Demo@123</code>).</li>
+    <li><strong>Fill</strong> <code>#username</code> and <code>input[name="pwd"]</code>, <strong>click</strong>
+      <code>#loginButton</code>.</li>
+    <li><strong>Assert</strong> the dashboard heading reads <code>Enter Time-Track for</code>.</li>
+    <li>… the test body runs …</li>
+    <li><strong>Click</strong> the profile menu button (the original's "logout" step).</li>
+    <li>Playwright disposes the context.</li>
+  </ol>
+
+  <h3>6.2 · Create Customer</h3>
+  <ol>
+    <li><code>clickOnTasks()</code> → opens the Tasks list (<code>a[href='/hni/tasks/tasklist.do']</code>).</li>
+    <li><code>clickOnAddNew()</code> → opens the "add new" dropdown (<code>div.addNewButton</code>).</li>
+    <li>Click <code>New Customer</code>.</li>
+    <li>Read <code>Prathap</code> / <code>This is test</code> from the <code>CreateCustomer</code> sheet.</li>
+    <li>Fill the customer name (2nd match of the placeholder) and description.</li>
+    <li>Click <code>Create Customer</code>.</li>
+  </ol>
+
+  <h3>6.3 · Delete Customer</h3>
+  <ol>
+    <li><code>clickOnTasks()</code>.</li>
+    <li>Type the customer name into "Quick search by name …".</li>
+    <li>From the matching row, click its <code>editButton</code> (navigates from the name
+      <code>span</code> up three ancestors, then down to the edit button).</li>
+    <li>Open <code>ACTIONS</code> → <code>Delete</code> → confirm <code>Delete permanently</code>.</li>
+  </ol>
+
+  <div class="callout warn">
+    <p><span class="tag">Reality check</span> These locators are verbatim from the Selenium project.
+    actiTIME's live UI evolves, so a step can break when the site's DOM no longer matches an old XPath
+    (on the last run, <code>deleteCustomer</code> failed at the row-edit button for this reason). The
+    <em>Playwright port is faithful</em>; fixing such a step means updating the locator, which is a
+    great first exercise — see §9 (codegen) and §10.</p>
+  </div>
+</section>
+
+<!-- 7 -->
+<section>
+  <h2>7 · Data-driven testing with Excel</h2>
+
+  <p>The workbook <code>data/data.xlsx</code> has four sheets. Row 0 is the header; row 1 holds the
+  values the tests read.</p>
+  <table>
+    <tr><th>Sheet</th><th>Col 0</th><th>Col 1</th><th>Row 1 value</th></tr>
+    <tr><td><code>Login</code></td><td>Username</td><td>Password</td><td>hemanthni101@gmail.com · Demo@123</td></tr>
+    <tr><td><code>CreateCustomer</code></td><td>Customer name</td><td>Description</td><td>Prathap · This is test</td></tr>
+    <tr><td><code>DeleteCustomer</code></td><td>Customer name</td><td>—</td><td>Prathap</td></tr>
+    <tr><td><code>Browser</code></td><td>Browser name</td><td>—</td><td>firefox</td></tr>
+  </table>
+
+  <p>Reading a value:</p>
+  <pre><code><span class="kw">const</span> name = <span class="kw">await</span> xlib.<span class="fn">getExcelData</span>(<span class="str">'CreateCustomer'</span>, <span class="str">1</span>, <span class="str">0</span>);
+<span class="cmt">//                              sheet             row  col   (0-based, like Apache POI)</span></code></pre>
+
+  <h4>Turning it into a real data-driven test</h4>
+  <p><code>getLastRowNum()</code> exists so you can loop over every data row. Example pattern:</p>
+  <pre><code><span class="kw">const</span> xlib = <span class="kw">new</span> ExcelLibrary();
+<span class="kw">const</span> last = <span class="kw">await</span> xlib.<span class="fn">getLastRowNum</span>(<span class="str">'CreateCustomer'</span>);
+<span class="kw">for</span> (<span class="kw">let</span> row = <span class="str">1</span>; row &lt;= last; row++) {
+  test(<span class="str">`create customer from row ${row}`</span>, <span class="kw">async</span> ({ page, tp }) =&gt; {
+    <span class="kw">const</span> name = <span class="kw">await</span> xlib.<span class="fn">getExcelData</span>(<span class="str">'CreateCustomer'</span>, row, <span class="str">0</span>);
+    <span class="cmt">// … same steps as createCustomer.spec.js …</span>
+  });
+}</code></pre>
+  <p>This is the Playwright equivalent of a TestNG <code>@DataProvider</code>.</p>
+</section>
+
+<!-- 8 -->
+<section>
+  <h2>8 · Running &amp; debugging tests</h2>
+
+  <h3>8.1 · Everyday commands</h3>
+  <table>
+    <tr><th>Command</th><th>What it does</th></tr>
+    <tr><td><code>npm test</code></td><td>Run every test (headless)</td></tr>
+    <tr><td><code>npm run test:smoke</code></td><td>Only <span class="pill">@smoke</span> — CreateCustomer + CreateUser</td></tr>
+    <tr><td><code>npm run test:customer</code></td><td>Only <span class="pill">@customer</span> — CreateCustomer + DeleteCustomer</td></tr>
+    <tr><td><code>npm run test:user</code></td><td>Only <span class="pill">@user</span> — CreateUser + DeleteUser</td></tr>
+    <tr><td><code>npm run test:functionality</code></td><td><span class="pill">@functionality</span> — all four</td></tr>
+    <tr><td><code>npm run test:headed</code></td><td>Same as <code>npm test</code> but shows the browser</td></tr>
+    <tr><td><code>npx playwright test tests/tasks/createCustomer.spec.js</code></td><td>One file</td></tr>
+    <tr><td><code>npx playwright test -g "testCreateCustomer"</code></td><td>Tests whose title matches</td></tr>
+    <tr><td><code>BROWSER=chromium npm test</code></td><td>Override the Excel browser choice</td></tr>
+    <tr><td><code>npm run report</code></td><td>Open the HTML report from the last run</td></tr>
+  </table>
+
+  <h3>8.2 · The three debugging superpowers</h3>
+
+  <h4>UI Mode — <code>npx playwright test --ui</code></h4>
+  <p>A visual runner: pick tests, watch them run, see each step, time-travel through DOM snapshots,
+  inspect locators, and re-run on save. The best place to learn what the code is doing.</p>
+
+  <h4>Debug Mode — <code>npx playwright test --debug</code></h4>
+  <p>Opens the Playwright Inspector and steps through the test line by line, with a "pick locator" tool.</p>
+
+  <h4>Trace Viewer — <code>npx playwright show-trace</code></h4>
+  <p>This project sets <code>trace: 'on-first-retry'</code>. After a failing run:</p>
+  <pre><code>npx playwright show-trace test-output/.../trace.zip
+<span class="cmt"># or just open the HTML report — traces are linked from failures</span></code></pre>
+  <p>A trace is a full recording: every action, before/after screenshots, network, console, and the DOM
+  at each step. There is no Selenium equivalent.</p>
+
+  <h4>Codegen — <code>npx playwright codegen https://online.actitime.com/hni/login.do</code></h4>
+  <p>Opens a browser, records your clicks and typing, and writes Playwright code with good locators.
+  Use it to repair a broken step: perform the action by hand, copy the locator it suggests.</p>
+
+  <h3>8.3 · Reports &amp; artifacts</h3>
+  <ul>
+    <li><strong>list reporter</strong> — the live console output</li>
+    <li><strong>html reporter</strong> — <code>test-output/</code>; open with <code>npm run report</code></li>
+    <li><strong>screenshots</strong> — captured only on failure, attached to the report</li>
+    <li><strong>traces</strong> — captured on first retry</li>
+  </ul>
+</section>
+
+<!-- 9 -->
+<section>
+  <h2>9 · Selenium → Playwright cheat sheet</h2>
+
+  <table>
+    <tr><th>Task</th><th>Selenium (Java)</th><th>Playwright (JavaScript)</th></tr>
+    <tr><td>Start browser</td><td><code>new ChromeDriver()</code></td><td>runner does it; you get <code>page</code></td></tr>
+    <tr><td>Open URL</td><td><code>driver.get(url)</code></td><td><code>await page.goto(url)</code></td></tr>
+    <tr><td>Find element</td><td><code>driver.findElement(By.id("x"))</code></td><td><code>page.locator('#x')</code></td></tr>
+    <tr><td>By id</td><td><code>By.id("username")</code></td><td><code>'#username'</code> or <code>page.getByLabel('Username')</code></td></tr>
+    <tr><td>By name</td><td><code>By.name("pwd")</code></td><td><code>'input[name="pwd"]'</code></td></tr>
+    <tr><td>By XPath</td><td><code>By.xpath("//h3[...]")</code></td><td><code>'xpath=//h3[...]'</code></td></tr>
+    <tr><td>By text</td><td><code>By.xpath("//div[text()='X']")</code></td><td><code>page.getByText('X', { exact: true })</code></td></tr>
+    <tr><td>By role</td><td>—</td><td><code>page.getByRole('button', { name: 'Login' })</code></td></tr>
+    <tr><td>Nth match</td><td><code>(//input[...])[2]</code></td><td><code>page.locator('input…').nth(1)</code></td></tr>
+    <tr><td>Type text</td><td><code>el.sendKeys("abc")</code></td><td><code>await loc.fill('abc')</code></td></tr>
+    <tr><td>Click</td><td><code>el.click()</code></td><td><code>await loc.click()</code></td></tr>
+    <tr><td>Read text</td><td><code>el.getText()</code></td><td><code>await loc.textContent()</code> / <code>innerText()</code></td></tr>
+    <tr><td>Title</td><td><code>driver.getTitle()</code></td><td><code>await page.title()</code></td></tr>
+    <tr><td>Wait for element</td><td><code>WebDriverWait + ExpectedConditions</code></td><td>built in — actions auto-wait</td></tr>
+    <tr><td>Assert equals</td><td><code>Assert.assertEquals(a, b)</code></td><td><code>expect(a).toBe(b)</code></td></tr>
+    <tr><td>Assert visible text</td><td>get text, then assert</td><td><code>await expect(loc).toHaveText('…')</code></td></tr>
+    <tr><td>Assert title</td><td>get title, then assert</td><td><code>await expect(page).toHaveTitle('…')</code></td></tr>
+    <tr><td>Maximize</td><td><code>driver.manage().window().maximize()</code></td><td><code>use: { viewport: { width, height } }</code></td></tr>
+    <tr><td>Implicit wait</td><td><code>manage().timeouts().implicitlyWait(...)</code></td><td><code>actionTimeout</code> / <code>expect.timeout</code> in config</td></tr>
+    <tr><td>Close</td><td><code>driver.close()</code> / <code>quit()</code></td><td>automatic per test</td></tr>
+    <tr><td>Screenshot</td><td><code>((TakesScreenshot)driver)…</code></td><td><code>await page.screenshot({ path })</code> (auto on failure)</td></tr>
+  </table>
+
+  <div class="callout">
+    <p><span class="tag">Golden rule</span> Prefer, in order:
+    <code>getByRole</code> → <code>getByLabel</code> / <code>getByPlaceholder</code> / <code>getByText</code>
+    → <code>getByTestId</code> → CSS → XPath. Role/label locators match what a user sees and survive
+    redesigns far better than XPath.</p>
+  </div>
+</section>
+
+<!-- 10 -->
+<section>
+  <h2>10 · Exercises</h2>
+  <p>Do these in order. Each teaches one Playwright idea.</p>
+
+  <ol>
+    <li><strong>Watch it run.</strong> <code>npx playwright test --ui</code>, run <span class="pill">@smoke</span>,
+      and step through <code>testCreateCustomer</code>. Find where each Excel value is read.</li>
+
+    <li><strong>Read a trace.</strong> Force a failure (change a locator to a wrong id), run the test,
+      open the HTML report, and open the trace. Identify the exact failing step and the DOM at that moment.</li>
+
+    <li><strong>Modernise a locator.</strong> In <code>tasksPage.js</code>, replace
+      <code>xpath=//div[@class='addNewButton']</code> with a <code>getByRole</code> or
+      <code>getByText</code> locator. Use <code>npx playwright codegen</code> to discover a good one.</li>
+
+    <li><strong>Add an assertion.</strong> After creating a customer, assert a success toast or that the
+      new customer name appears in the list — <code>await expect(page.getByText('Prathap')).toBeVisible()</code>.</li>
+
+    <li><strong>Repair <code>deleteCustomer</code>.</strong> Open the Tasks page manually with codegen,
+      search a customer, and record the real "edit / delete" locators. Update the spec so the whole
+      <span class="pill">@customer</span> suite passes.</li>
+
+    <li><strong>Make it data-driven.</strong> Add a second row to the <code>CreateCustomer</code> sheet
+      and use the <code>getLastRowNum</code> loop from §7 so both customers are created.</li>
+
+    <li><strong>Add a cross-browser run.</strong> Add a <code>projects</code> array in the config with
+      <code>chromium</code>, <code>firefox</code> and <code>webkit</code>, and run
+      <code>npx playwright test --project=webkit</code>.</li>
+
+    <li><strong>Speed it up.</strong> Set <code>fullyParallel: true</code> and <code>workers: 4</code>.
+      Observe that each test still logs in independently because contexts are isolated. (Bonus: cache
+      login with <code>storageState</code> so <code>beforeEach</code> skips the UI login.)</li>
+
+    <li><strong>Replace the "logout" step.</strong> The ported <code>afterEach</code> only opens the
+      profile menu (faithful to the original bug). Make it actually click "Logout" and assert the login
+      page is back.</li>
+
+    <li><strong>Convert to TypeScript.</strong> Rename specs to <code>.spec.ts</code>, add
+      <code>tsconfig.json</code>, and get autocomplete for <code>page</code>, <code>expect</code> and
+      your page objects.</li>
+  </ol>
+</section>
+
+<!-- 11 -->
+<section>
+  <h2>11 · Troubleshooting &amp; FAQ</h2>
+
+  <h4>"Executable doesn't exist … run npx playwright install"</h4>
+  <p>The browser binaries are not downloaded. Run <code>npx playwright install</code> (optionally
+  <code>npx playwright install firefox chromium webkit</code>).</p>
+
+  <h4>A step times out on a locator</h4>
+  <p>The element isn't there, isn't visible, or the selector is wrong for the current site. Run with
+  <code>--ui</code> or <code>--debug</code>, use the locator picker, or <code>codegen</code> to find the
+  right selector. Timeouts come from <code>actionTimeout</code> / <code>expect.timeout</code> in the config.</p>
+
+  <h4>Login fails</h4>
+  <p>The demo credentials in <code>data/data.xlsx</code> (<code>Login</code> sheet) may have expired or
+  the account state changed. Update the sheet with working actiTIME demo credentials.</p>
+
+  <h4>"deviceScaleFactor is not supported with null viewport"</h4>
+  <p>Don't combine a spread <code>devices[...]</code> preset with <code>viewport: null</code>. This
+  project sets an explicit numeric <code>viewport</code> instead.</p>
+
+  <h4>Config error: "must export a single object"</h4>
+  <p><code>playwright.config.js</code> must <code>module.exports</code> a plain object (or a
+  <code>defineConfig(...)</code> result) — not a function/promise in this Playwright version. That is
+  why the browser is read with the synchronous <code>excelSync.js</code>.</p>
+
+  <h4>Why is <code>adm-zip</code> a normal dependency, not dev?</h4>
+  <p><code>playwright.config.js</code> uses it at load time via <code>excelSync.js</code>. Everything
+  else (the runner, <code>exceljs</code>) is dev-only.</p>
+
+  <h4>Where are screenshots / videos / traces?</h4>
+  <p>Under <code>test-results/</code> (per-test artifacts) and linked from the HTML report in
+  <code>test-output/</code>. Both are git-ignored.</p>
+
+  <h4>How do I run just one test while developing?</h4>
+  <p>Add <code>.only</code>: <code>test.only('testCreateCustomer', …)</code>, or use
+  <code>npx playwright test -g "testCreateCustomer"</code>.</p>
+</section>
+
+<!-- 12 -->
+<section>
+  <h2>12 · Where to go next</h2>
+  <ul>
+    <li><strong>Official docs</strong> — <a href="https://playwright.dev/docs/intro">playwright.dev/docs</a>
+      (start with "Writing tests", "Locators", "Assertions", "Trace viewer", "Test fixtures").</li>
+    <li><strong>Best practices</strong> — <a href="https://playwright.dev/docs/best-practices">playwright.dev/docs/best-practices</a>.</li>
+    <li><strong>Locators guide</strong> — <a href="https://playwright.dev/docs/locators">playwright.dev/docs/locators</a>.</li>
+    <li><strong>API reference</strong> — <a href="https://playwright.dev/docs/api/class-page">Page</a>,
+      <a href="https://playwright.dev/docs/api/class-locator">Locator</a>,
+      <a href="https://playwright.dev/docs/test-assertions">expect</a>.</li>
+    <li><strong>VS Code extension</strong> — "Playwright Test for VSCode": run/debug from the gutter,
+      pick locators, record new tests.</li>
+    <li><strong>Auth caching</strong> — <a href="https://playwright.dev/docs/auth">playwright.dev/docs/auth</a>
+      to skip UI login with <code>storageState</code>.</li>
+  </ul>
+
+  <hr>
+  <p class="lead">You now have the full map: this project is the Selenium actiTIME framework with the
+  timing pain removed, inheritance replaced by fixtures, and XML suites replaced by tags. Work through
+  the exercises in §10 and you will know Playwright.</p>
+</section>
+
+</body>
+</html>

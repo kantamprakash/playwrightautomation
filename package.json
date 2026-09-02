@@ -1,0 +1,27 @@
+{
+  "name": "playwrightautomation",
+  "version": "1.0.0",
+  "description": "Playwright (JavaScript) port of the Actitime Selenium + TestNG automation project",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:customer": "playwright test --grep @customer",
+    "test:user": "playwright test --grep @user",
+    "test:functionality": "playwright test --grep @functionality",
+    "report": "playwright show-report test-output"
+  },
+  "keywords": [
+    "playwright",
+    "actitime",
+    "automation"
+  ],
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "exceljs": "^4.4.0"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.18"
+  }
+}
