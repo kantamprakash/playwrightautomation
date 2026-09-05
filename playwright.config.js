@@ -42,8 +42,10 @@ module.exports = defineConfig({
   retries: 0,
   timeout: 60_000,
   expect: { timeout: 30_000 },
+  // The junit report must live outside test-output/: the html reporter
+  // wipes its whole outputFolder on every run, which would delete it.
   reporter: process.env.CI
-    ? [['list'], ['junit', { outputFile: 'test-output/junit-results.xml' }], ['html', { outputFolder: 'test-output', open: 'never' }]]
+    ? [['list'], ['junit', { outputFile: 'test-results/junit-results.xml' }], ['html', { outputFolder: 'test-output', open: 'never' }]]
     : [['list'], ['html', { outputFolder: 'test-output', open: 'never' }]],
   use: {
     baseURL: 'https://online.actitime.com',
