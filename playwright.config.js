@@ -24,6 +24,7 @@ const BROWSER_PROJECTS = {
 };
 
 let browserName = process.env.BROWSER;
+
 if (!browserName) {
   try {
     browserName = getExcelDataSync('Browser', 1, 0);
@@ -41,7 +42,9 @@ module.exports = defineConfig({
   retries: 0,
   timeout: 60_000,
   expect: { timeout: 30_000 },
-  reporter: [['list'], ['html', { outputFolder: 'test-output', open: 'never' }]],
+  reporter: process.env.CI
+    ? [['list'], ['junit', { outputFile: 'test-output/junit-results.xml' }], ['html', { outputFolder: 'test-output', open: 'never' }]]
+    : [['list'], ['html', { outputFolder: 'test-output', open: 'never' }]],
   use: {
     baseURL: 'https://online.actitime.com',
     actionTimeout: 30_000,
